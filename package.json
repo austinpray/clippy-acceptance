@@ -1,0 +1,26 @@
+{
+  "name": "clippy-acceptance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Acceptance test to be run against API implementations to check for completeness.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clippy-io/clippy-acceptance.git"
+  },
+  "author": "Austin Pray <austin@austinpray.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clippy-io/clippy-acceptance/issues"
+  },
+  "homepage": "https://github.com/clippy-io/clippy-acceptance",
+  "devDependencies": {
+    "chai": "^2.0.0",
+    "config": "^1.11.0",
+    "mocha": "^2.1.0",
+    "restify": "^2.8.5"
+  }
+}
