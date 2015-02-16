@@ -59,15 +59,17 @@ and the server.
 
 #### `SyncRequest`<a name="SyncRequest"></a>
 
-This is actually stored on the server and should have an expiration.
+This is briefly stored on the server and should have an expiration.
 
-| Property  | Type                 | Description                                                     |
-|-----------|----------------------|-----------------------------------------------------------------|
-| group     | String, [UUIDv4][]   | Identifies the group of devices                                 |
-| code      | String, [SyncCode][] | Used to look up sync request                                    |
-| status    | String               | Can be any of: `accepted`, `pending`                            |
-| initiator | Object, [Client][]   | `Client` that is inviting the target client into the device group |
-| target    | Object, [Client][]   | Target `Client` that is being invited into the device group       |
+| Property  | Type                  | Description                                                       |
+|-----------|-----------------------|-------------------------------------------------------------------|
+| group     | String, [UUIDv4][]    | Identifies the group of devices                                   |
+| code      | String, [SyncCode][]  | Used to look up sync request                                      |
+| status    | String                | Can be any of: `accepted`, `pending`                              |
+| initiator | Object, [Client][]    | `Client` that is inviting the target client into the device group |
+| target    | Object, [Client][]    | Target `Client` that is being invited into the device group       |
+| createdAt | String, UTC Timestamp | Creation time
+| expiresAt | String, UTC Timestamp | Future expiration date
 
 ### REST API
 
