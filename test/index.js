@@ -1,12 +1,16 @@
 var config = require('config');
 var restify = require('restify');
 var assert = require('chai').assert;
+var uuid = require('node-uuid');
+
+var clientUUID = uuid.v4();
+var groupUUID = uuid.v4();
 
 var client = restify.createJsonClient({
   url: config.endpointBase
 });
 
-describe('server capabilities', function () {
+describe('GET /capabilities', function () {
   it('should give a name', function (done) {
     client.get('/capabilities', function (err, req, res, obj) {
       assert.isNull(err);
@@ -33,25 +37,41 @@ describe('server capabilities', function () {
   });
 });
 
-describe('sending a paste', function () {
-  it('should successfully send a paste', function (done) {
-    var request = {};
-    client.post('/pastes', request, function (err, req, res, obj) {
+describe('POST /sync', function () {
+  var mockPeer1 = {
+    id: uuid.v4(),
+    group: groupUUID,
+    name: 'Test Peer',
+    publicKey: 'big long string'
+  };
+  var mockPeer2 = {
+    id: uuid.v4(),
+    group: groupUUID,
+    name: 'Test Peer',
+    publicKey: 'big long string'
+  };
+  var mockClient1 = {
+    id: clientUUID,
+    group: groupUUID,
+    name: 'Test Harness',
+    publicKey: 'big long string',
+    peers: [mockPeer1, mockPeer2]
+  };
+  it('should accept a POST request', function (done) {
+    client.post('/sync', mockClient1, function (err, req, res, obj) {
       assert.isNull(err);
       done();
     });
   });
-});
-
-describe('getting a paste', function () {
-  it('should return an object', function (done) {
-    client.get('/pastes', function (err, req, res, obj) {
-
-      var expected = {};
-
-      assert.isNull(err);
+  it('should return a SyncRequest', function (done) {
+    client.post('/sync', mockClient1, function (err, req, res, obj) {
+      console.log(obj);
+      assert.equal(obj.group, groupUUID);
+      assert.isString(obj.code);
+      assert.lengthOf(obj.code, 6);
+      assert.equal(obj.status, 'pending');
       done();
-      
     });
   });
+
 });
