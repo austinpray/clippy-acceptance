@@ -3,75 +3,142 @@ var restify = require('restify');
 var assert = require('chai').assert;
 var uuid = require('node-uuid');
 
-var clientUUID = uuid.v4();
+var initiatorUUID = uuid.v4();
+var targetUUID = uuid.v4();
 var groupUUID = uuid.v4();
 
 var client = restify.createJsonClient({
   url: config.endpointBase
 });
 
-describe('GET /capabilities', function () {
-  it('should give a name', function (done) {
-    client.get('/capabilities', function (err, req, res, obj) {
-      assert.isNull(err);
-      assert.isString(obj.name);
+var syncCode1;
+
+var mockPeer1 = {
+  id: uuid.v4(),
+  group: groupUUID,
+  name: 'Test Peer',
+  publicKey: 'big long string'
+};
+var mockPeer2 = {
+  id: uuid.v4(),
+  group: groupUUID,
+  name: 'test peer',
+  publicKey: 'big long string'
+};
+var mockInitiator1 = {
+  id: initiatorUUID,
+  group: groupUUID,
+  name: 'Test Initiator',
+  publicKey: 'big long string',
+  peers: [mockPeer1, mockPeer2]
+};
+var mockTarget1 = {
+  id: targetUUID,
+  group: groupUUID,
+  name: 'Test Target',
+  publicKey: 'big long string'
+};
+
+describe('GET /capabilities', function() {
+  var response;
+  var error;
+  before(function(done) {
+    client.get('/capabilities', function(err, req, res, obj) {
+      response = obj;
+      error = err;
       done();
     });
   });
-  it('should give a version', function (done) {
-    client.get('/capabilities', function (err, req, res, obj) {
-      assert.isNull(err);
-      assert.isString(obj.version);
-      done();
-    });
+  it('it should respond successfully', function() {
+    assert.isNull(error);
   });
-  it('should give an array of capabilities', function (done) {
-    client.get('/capabilities', function (err, req, res, obj) {
-      assert.isNull(err);
-      assert.isArray(obj.capabilities);
-      assert.sameMembers(obj.capabilities, [
-        "REST"
-      ]);
-      done();
-    });
+  it('should give a name', function() {
+    assert.isString(response.name);
+  });
+  it('should give a version', function() {
+    assert.isString(response.version);
+  });
+  it('should give an array of capabilities', function() {
+    assert.isArray(response.capabilities);
+    assert.sameMembers(response.capabilities, [
+      'REST'
+    ]);
   });
 });
 
-describe('POST /sync', function () {
-  var mockPeer1 = {
-    id: uuid.v4(),
-    group: groupUUID,
-    name: 'Test Peer',
-    publicKey: 'big long string'
-  };
-  var mockPeer2 = {
-    id: uuid.v4(),
-    group: groupUUID,
-    name: 'Test Peer',
-    publicKey: 'big long string'
-  };
-  var mockClient1 = {
-    id: clientUUID,
-    group: groupUUID,
-    name: 'Test Harness',
-    publicKey: 'big long string',
-    peers: [mockPeer1, mockPeer2]
-  };
-  it('should accept a POST request', function (done) {
-    client.post('/sync', mockClient1, function (err, req, res, obj) {
-      assert.isNull(err);
+describe('POST /sync', function() {
+  var response;
+  var error;
+  before(function(done) {
+    client.post('/sync', mockInitiator1, function(err, req, res, obj) {
+      response = obj;
+      syncCode1 = obj.code;
+      error = err;
       done();
     });
   });
-  it('should return a SyncRequest', function (done) {
-    client.post('/sync', mockClient1, function (err, req, res, obj) {
-      console.log(obj);
-      assert.equal(obj.group, groupUUID);
-      assert.isString(obj.code);
-      assert.lengthOf(obj.code, 6);
-      assert.equal(obj.status, 'pending');
+  it('should accept a POST request', function() {
+    assert.isNull(error);
+  });
+  it('should return a SyncRequest', function() {
+    assert.equal(response.group, groupUUID);
+    assert.isString(response.code);
+    assert.lengthOf(response.code, 6);
+    assert.equal(response.status, 'pending');
+  });
+});
+
+describe('POST /sync/{{ code }}', function() {
+  var response;
+  var error;
+  before(function(done) {
+    client.post('/sync/' + syncCode1,
+                mockTarget1,
+                function(err, req, res, obj) {
+      response = obj;
+      error = err;
       done();
     });
+  });
+  it('should accept a POST request', function() {
+    assert.isNull(error);
+  });
+  it('should return a SyncRequest', function() {
+    assert.equal(response.group, groupUUID);
+    assert.isString(response.code);
+    assert.lengthOf(response.code, 6);
+  });
+  it('should have the status set as accepted', function() {
+    assert.equal(response.status, 'accepted');
+  });
+  it('should have the initiator defined', function() {
+    assert.equal(response.initiator.id, mockInitiator1.id);
+  });
+  it('should have the target defined', function() {
+    assert.equal(response.target.id, mockTarget1.id);
+  });
+});
+
+describe('GET /sync/{{ code }}', function() {
+  var response;
+  var error;
+  before(function(done) {
+    client.get('/sync/' + syncCode1, function(err, req, res, obj) {
+      response = obj;
+      error = err;
+      done();
+    });
+  });
+
+  it('should accept a GET request', function() {
+    assert.isNull(error);
+  });
+
+  it('should return a SyncRequest', function() {
+    assert.isString(response.code);
+    assert.lengthOf(response.code, 6);
+    assert.isString(response.group);
+    assert.isString(response.status);
   });
 
 });
