@@ -44,14 +44,6 @@ an environment variable. See [node-config][].
 
 ## Implementation
 
-### Classes
-
-#### `SyncCode`<a name="SyncCode"></a>
-
-Returns String of 6 random alphanumeric characters. 
-
-This is supposed to be short code for human reading and typing.
-
 ### Models
 
 #### `Client`<a name="Client"></a>
@@ -80,6 +72,18 @@ This is briefly stored on the server and should have an expiration.
 | target    | Object, [Client][]    | Target `Client` that is being invited into the device group       |
 | createdAt | String, UTC Timestamp | Creation time
 | expiresAt | String, UTC Timestamp | Future expiration date
+
+#### `Error`<a name="Error"></a>
+
+Error objects MUST be returned as a collection keyed by "errors" in the top
+level of a JSON API document, and SHOULD NOT be returned with any primary data.
+Inspired by [json api](http://jsonapi.org/format/#errors).
+
+| Property       | Type             | Description                                                                                                                |
+|----------------|------------------|----------------------------------------------------------------------------------------------------------------------------|
+| message        | String           | A short, human-readable summary of the problem.                                                                            |
+| fieldNames     | Array of Strings | If applicable, the problematic field names.                                                                                |
+| classification | String           | An application-specific error code. Can be any of `RequiredError`, `ContentTypeError`, `DeserializationError`, `TypeError` |
 
 ### REST API
 
@@ -151,9 +155,10 @@ Returns a [SyncRequest][] with the following properties defined:
 Returns a [SyncRequest][] based on the given code parameter. 
 
 [Client]: #Client
+[Error]: #Error
+[SemVer]: http://semver.org/
 [SyncCode]: #SyncCode
 [SyncRequest]: #SyncRequest
 [UUIDV4]: http://www.ietf.org/rfc/rfc4122.txt
 [node-config]: https://github.com/lorenwest/node-config
 [rfc4880]: http://tools.ietf.org/html/rfc4880
-[SemVer]: http://semver.org/

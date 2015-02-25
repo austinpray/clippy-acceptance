@@ -67,24 +67,52 @@ describe('GET /capabilities', function() {
 });
 
 describe('POST /sync', function() {
-  var response;
-  var error;
-  before(function(done) {
-    client.post('/sync', mockInitiator1, function(err, req, res, obj) {
-      response = obj;
-      syncCode1 = obj.code;
-      error = err;
-      done();
+  describe('creating a new SyncRequest', function() {
+    var response;
+    var error;
+    before(function(done) {
+      client.post('/sync', mockInitiator1, function(err, req, res, obj) {
+        response = obj;
+        syncCode1 = obj.code;
+        error = err;
+        done();
+      });
+    });
+    it('should accept a POST request', function() {
+      assert.isNull(error);
+    });
+    it('should return a SyncRequest', function() {
+      assert.equal(response.group, groupUUID);
+      assert.isString(response.code);
+      assert.lengthOf(response.code, 6);
+      assert.equal(response.status, 'pending');
     });
   });
-  it('should accept a POST request', function() {
-    assert.isNull(error);
-  });
-  it('should return a SyncRequest', function() {
-    assert.equal(response.group, groupUUID);
-    assert.isString(response.code);
-    assert.lengthOf(response.code, 6);
-    assert.equal(response.status, 'pending');
+  describe('error handling', function() {
+    var response2;
+    var error2;
+    before(function(done) {
+      client.post('/sync', {
+        totally: 'bogus',
+        object: 'with nothing that makes sense'
+      }, function(err, req, res, obj) {
+        response2 = obj;
+        error2 = err;
+        done();
+      });
+    });
+    describe('invalid initiator object', function() {
+      it('should return 400 status code', function() {
+        assert.isNotNull(error2);
+        assert.isTrue(error2.statusCode >= 400);
+      });
+      it('should return an error collection', function() {
+        assert.isArray(response2);
+        assert.isString(response2[0].message);
+        assert.isArray(response2[0].fieldNames);
+        assert.isString(response2[0].classification);
+      });
+    });
   });
 });
 
@@ -140,5 +168,4 @@ describe('GET /sync/{{ code }}', function() {
     assert.isString(response.group);
     assert.isString(response.status);
   });
-
 });
