@@ -154,6 +154,55 @@ Returns a [SyncRequest][] with the following properties defined:
 
 Returns a [SyncRequest][] based on the given code parameter. 
 
+## Usage
+
+### Adding a device to an existing group
+
+#### Start Conditions
+
+##### Initiator Client
+
+The Initiator Client is a client who is already a part of a federation of
+clients. The Initiator Client wishes to add the Target Client to its federation.
+The Initiator Client has the following properties already defined:
+
+- `id`
+- `group`
+- `name`
+- `peers` (if it has any peers)
+- `publicKey`
+
+##### Target Client
+
+The Target Client is a fresh client with no group id or peers. The Target Client
+comes to the party prepared with:
+
+- `id`
+- `name`
+- `publicKey`
+
+#### End Result
+
+![Sync Flow](https://rawgit.com/clippy-io/clippy-acceptance/master/assets/SyncProcessBeforeAfter.svg)
+
+##### Initiator Client
+
+Initiator client adds the Target Client to it's `peers` array. 
+
+##### Target Client
+
+Target Client inherits the Initiator's `group` id, which means it joins the
+Initiator Client's federation. The Target Client also inherits all of the
+Initiator Client's peers.
+
+#### Flow
+
+![Sync Flow](https://rawgit.com/clippy-io/clippy-acceptance/master/assets/SyncProcess.svg)
+
+## Todo
+
+- :soon: Sending Messages Between Clients
+
 [Client]: #Client
 [Error]: #Error
 [SemVer]: http://semver.org/
